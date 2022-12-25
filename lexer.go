@@ -119,7 +119,11 @@ func (lex *RuleEngineLex) Lex(lval *ruleEngineSymType) int {
 }
 
 func (lex *RuleEngineLex) Error(s string) {
-	lex.err = GetError(ErrRuleEngineSyntaxError, fmt.Sprintf("%v, pos: %v", s, lex.pos))
+	prefix := make([]byte, lex.pos)
+	for i := 0; i < lex.pos; i++ {
+		prefix[i] = ' '
+	}
+	lex.err = GetError(ErrRuleEngineSyntaxError, fmt.Sprintf("%v, pos: %v\n%v\n%v\n", s, lex.pos, lex.str, string(prefix)+"^"))
 }
 
 func (lex *RuleEngineLex) getErrCode() int {
