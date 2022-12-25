@@ -1,4 +1,4 @@
-module github.com/Uyouii/rule-engine-go
+module github.com/uyouii/rule_engine
 
 go 1.17
 
