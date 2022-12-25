@@ -29,7 +29,7 @@ func GetNewRuleEngineTest(t testing.TB, params []*Param, useDecimal bool) (*Rule
 	}, nil
 }
 
-const DEBUG = true
+const DEBUG = false
 
 func (rt *RuleEngineTest) check(checkCase *CheckUnit) {
 	res, err := rt.praser.Parse(checkCase.str)

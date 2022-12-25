@@ -77,7 +77,7 @@ func (lex *RuleEngineLex) Lex(lval *ruleEngineSymType) int {
 	if len(matchStr) > 0 {
 		lex.pos += len(matchStr)
 		lval.node = &TokenNode{
-			ValueType: VALUE_TOKEN_TO_VALUE_TYPE[token],
+			ValueType: valueTokenToValueType[token],
 		}
 
 		switch token {

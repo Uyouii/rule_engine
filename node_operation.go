@@ -10,7 +10,7 @@ type TokenOperator struct {
 }
 
 func (o *TokenOperator) tokenNodeAdd(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_MATH, "+"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeMath, "+"); err != nil {
 		return nil, err
 	}
 
@@ -27,7 +27,7 @@ func (o *TokenOperator) tokenNodeAdd(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeSub(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_MATH, "-"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeMath, "-"); err != nil {
 		return nil, err
 	}
 
@@ -44,7 +44,7 @@ func (o *TokenOperator) tokenNodeSub(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeMul(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_MATH, "*"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeMath, "*"); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (o *TokenOperator) tokenNodeMul(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeDiv(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_MATH, "/"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeMath, "/"); err != nil {
 		return nil, err
 	}
 
@@ -82,7 +82,7 @@ func (o *TokenOperator) tokenNodeDiv(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeMod(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_MOD, "%"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeMod, "%"); err != nil {
 		return nil, err
 	}
 
@@ -94,7 +94,7 @@ func (o *TokenOperator) tokenNodeMod(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeMinus(t *TokenNode) (*TokenNode, error) {
-	if err := checkOperType(t, OPER_TYPE_MINUS, "-"); err != nil {
+	if err := checkOperType(t, operTypeMinus, "-"); err != nil {
 		return nil, err
 	}
 	res := &TokenNode{ValueType: t.ValueType}
@@ -115,7 +115,7 @@ func (o *TokenOperator) tokenNodeMinus(t *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeGreater(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_RELATION, ">"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeRelation, ">"); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +139,7 @@ func (o *TokenOperator) tokenNodeGreater(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeLess(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_RELATION, "<"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeRelation, "<"); err != nil {
 		return nil, err
 	}
 
@@ -163,7 +163,7 @@ func (o *TokenOperator) tokenNodeLess(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeGreaterEqual(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_RELATION, ">="); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeRelation, ">="); err != nil {
 		return nil, err
 	}
 
@@ -187,7 +187,7 @@ func (o *TokenOperator) tokenNodeGreaterEqual(x, y *TokenNode) (*TokenNode, erro
 }
 
 func (o *TokenOperator) tokenNodeLessEqual(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_RELATION, "<="); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeRelation, "<="); err != nil {
 		return nil, err
 	}
 
@@ -211,7 +211,7 @@ func (o *TokenOperator) tokenNodeLessEqual(x, y *TokenNode) (*TokenNode, error) 
 }
 
 func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_EQUAL, "=="); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeEqual, "=="); err != nil {
 		return nil, err
 	}
 
@@ -253,7 +253,7 @@ func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeNotEqual(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_EQUAL, "!="); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeEqual, "!="); err != nil {
 		return nil, err
 	}
 
@@ -265,7 +265,7 @@ func (o *TokenOperator) tokenNodeNotEqual(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeAnd(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_LOGIC, "and"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeLogic, "and"); err != nil {
 		return nil, err
 	}
 
@@ -273,7 +273,7 @@ func (o *TokenOperator) tokenNodeAnd(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeOr(x, y *TokenNode) (*TokenNode, error) {
-	if err := batchCheckOperType([]*TokenNode{x, y}, OPER_TYPE_LOGIC, "or"); err != nil {
+	if err := batchCheckOperType([]*TokenNode{x, y}, operTypeLogic, "or"); err != nil {
 		return nil, err
 	}
 
@@ -281,7 +281,7 @@ func (o *TokenOperator) tokenNodeOr(x, y *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeNot(t *TokenNode) (*TokenNode, error) {
-	if err := checkOperType(t, OPER_TYPE_LOGIC, "not"); err != nil {
+	if err := checkOperType(t, operTypeLogic, "not"); err != nil {
 		return nil, err
 	}
 
@@ -323,7 +323,7 @@ func (o *TokenOperator) tokenNodeThirdOper(x *TokenNode, c *TokenNode, y *TokenN
 	// x if c else y, c must bool value
 	err := checkFiledType(c, []ValueType{ValueTypeBool})
 	if err != nil {
-		strValueType := VALUE_TYPE_NAME_DICT[c.ValueType]
+		strValueType := valueTypeNameDict[c.ValueType]
 		err.(*EngineErr).ErrMsg = fmt.Sprintf("if else condition type must bool value, but give :%v", strValueType)
 		return nil, err
 	}

@@ -46,8 +46,8 @@ func isFloatEqual(x, y float64) bool {
 	return math.Abs(x-y) < 0.00000000001
 }
 
-func checkOperType(t *TokenNode, oper_type OPER_TYPE, oper_name string) error {
-	validTypeList, ok := OPER_VALID_TYPE[oper_type]
+func checkOperType(t *TokenNode, oper_type operType, oper_name string) error {
+	validTypeList, ok := operValidType[oper_type]
 	if !ok {
 		return GetError(ErrRuleEngineUnknownOperator, fmt.Sprintf("unkonwn operator, oper: %v", oper_name))
 	}
@@ -57,14 +57,14 @@ func checkOperType(t *TokenNode, oper_type OPER_TYPE, oper_name string) error {
 			return nil
 		}
 	}
-	valueType_str, ok := VALUE_TYPE_NAME_DICT[t.ValueType]
+	valueType_str, ok := valueTypeNameDict[t.ValueType]
 	if !ok {
 		valueType_str = ""
 	}
 	return GetError(ErrRuleEngineNotSupportedOperator, fmt.Sprintf("%v not support operation: %v", valueType_str, oper_name))
 }
 
-func batchCheckOperType(token_list []*TokenNode, oper_type OPER_TYPE, oper_name string) error {
+func batchCheckOperType(token_list []*TokenNode, oper_type operType, oper_name string) error {
 	for _, t := range token_list {
 		if err := checkOperType(t, oper_type, oper_name); err != nil {
 			return err
@@ -130,7 +130,7 @@ func parseParam(useDecimal bool, param *Param) error {
 	}
 
 	notMatchErr := GetError(ErrRuleEngineParamValueTypeNotMatch,
-		fmt.Sprintf("value: %v, type: %v", param.Value, VALUE_TYPE_NAME_DICT[param.Type]))
+		fmt.Sprintf("value: %v, type: %v", param.Value, valueTypeNameDict[param.Type]))
 
 	switch rt.Kind() {
 	case reflect.Invalid:

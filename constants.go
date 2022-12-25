@@ -76,11 +76,20 @@ const (
 	ValueTypeFloat
 	ValueTypeBool
 	ValueTypeString
-	ValueTypeArgs
 	ValueTypeDecimal
+	valueTypeArgs
 )
 
-var VALUE_TOKEN_TO_VALUE_TYPE = map[int]ValueType{
+var valueTypeNameDict = map[ValueType]string{
+	ValueTypeBool:    "bool",
+	ValueTypeFloat:   "float",
+	ValueTypeString:  "string",
+	ValueTypeInteger: "integer",
+	valueTypeArgs:    "args",
+	ValueTypeDecimal: "decimal",
+}
+
+var valueTokenToValueType = map[int]ValueType{
 	INTEGER:    ValueTypeInteger,
 	FLOAT:      ValueTypeFloat,
 	STRING:     ValueTypeString,
@@ -90,39 +99,30 @@ var VALUE_TOKEN_TO_VALUE_TYPE = map[int]ValueType{
 	IDENTIFIER: ValueTypeString,
 }
 
-type OPER_TYPE int
+type operType int
 
 const (
-	OPER_TYPE_MATH OPER_TYPE = 1 + iota
-	OPER_TYPE_MOD
-	OPER_TYPE_MINUS
-	OPER_TYPE_RELATION
-	OPER_TYPE_EQUAL
-	OPER_TYPE_LOGIC
-	OPER_TYPE_STRING
-	OPER_TYPE_ARGUMENT
-	OPER_TYPE_REGEX
-	OPER_TYPE_CHANGE_TO
+	operTypeMath operType = 1 + iota
+	operTypeMod
+	operTypeMinus
+	operTypeRelation
+	operTypeEqual
+	operTypeLogic
+	operTypeString
+	operTypeArgument
+	operTypeRegex
+	operTypeChangeTo
 )
 
-var OPER_VALID_TYPE = map[OPER_TYPE][]ValueType{
-	OPER_TYPE_MATH:      {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
-	OPER_TYPE_MOD:       {ValueTypeInteger},
-	OPER_TYPE_MINUS:     {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
-	OPER_TYPE_RELATION:  {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
-	OPER_TYPE_EQUAL:     {ValueTypeInteger, ValueTypeFloat, ValueTypeBool, ValueTypeString, ValueTypeDecimal},
-	OPER_TYPE_LOGIC:     {ValueTypeBool},
-	OPER_TYPE_STRING:    {ValueTypeString},
-	OPER_TYPE_ARGUMENT:  {ValueTypeArgs},
-	OPER_TYPE_REGEX:     {ValueTypeString},
-	OPER_TYPE_CHANGE_TO: {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal, ValueTypeString},
-}
-
-var VALUE_TYPE_NAME_DICT = map[ValueType]string{
-	ValueTypeBool:    "bool",
-	ValueTypeFloat:   "float",
-	ValueTypeString:  "string",
-	ValueTypeInteger: "integer",
-	ValueTypeArgs:    "args",
-	ValueTypeDecimal: "decimal",
+var operValidType = map[operType][]ValueType{
+	operTypeMath:     {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
+	operTypeMod:      {ValueTypeInteger},
+	operTypeMinus:    {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
+	operTypeRelation: {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal},
+	operTypeEqual:    {ValueTypeInteger, ValueTypeFloat, ValueTypeBool, ValueTypeString, ValueTypeDecimal},
+	operTypeLogic:    {ValueTypeBool},
+	operTypeString:   {ValueTypeString},
+	operTypeArgument: {valueTypeArgs},
+	operTypeRegex:    {ValueTypeString},
+	operTypeChangeTo: {ValueTypeInteger, ValueTypeFloat, ValueTypeDecimal, ValueTypeString},
 }

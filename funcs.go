@@ -12,7 +12,7 @@ import (
 
 func (o *TokenOperator) tokenNodeArg(arg *TokenNode) (*TokenNode, error) {
 	res := &TokenNode{
-		ValueType: ValueTypeArgs,
+		ValueType: valueTypeArgs,
 	}
 	tokenList := []*TokenNode{arg}
 
@@ -21,7 +21,7 @@ func (o *TokenOperator) tokenNodeArg(arg *TokenNode) (*TokenNode, error) {
 }
 
 func (o *TokenOperator) tokenNodeArgList(argList *TokenNode, arg *TokenNode) (*TokenNode, error) {
-	if err := checkOperType(argList, OPER_TYPE_ARGUMENT, "args"); err != nil {
+	if err := checkOperType(argList, operTypeArgument, "args"); err != nil {
 		return nil, err
 	}
 
@@ -34,7 +34,7 @@ func (o *TokenOperator) tokenNodeArgList(argList *TokenNode, arg *TokenNode) (*T
 func (o *TokenOperator) tokenNodeFunc(funcNode *TokenNode, argNode *TokenNode) (*TokenNode, error) {
 	argList := []*TokenNode{}
 	if argNode != nil {
-		if err := checkOperType(argNode, OPER_TYPE_ARGUMENT, "args"); err != nil {
+		if err := checkOperType(argNode, operTypeArgument, "args"); err != nil {
 			return nil, err
 		}
 		argList = argNode.Value.([]*TokenNode)
@@ -83,7 +83,7 @@ func (o *TokenOperator) funcString(argList []*TokenNode) (*TokenNode, error) {
 	}
 
 	arg := argList[0]
-	if err := checkOperType(arg, OPER_TYPE_CHANGE_TO, "string"); err != nil {
+	if err := checkOperType(arg, operTypeChangeTo, "string"); err != nil {
 		return nil, err
 	}
 
@@ -106,7 +106,7 @@ func (o *TokenOperator) funcDecimal(argList []*TokenNode) (*TokenNode, error) {
 	}
 
 	arg := argList[0]
-	if err := checkOperType(arg, OPER_TYPE_CHANGE_TO, "decimal"); err != nil {
+	if err := checkOperType(arg, operTypeChangeTo, "decimal"); err != nil {
 		return nil, err
 	}
 
@@ -133,7 +133,7 @@ func (o *TokenOperator) funcFloat(argList []*TokenNode) (*TokenNode, error) {
 	}
 
 	arg := argList[0]
-	if err := checkOperType(arg, OPER_TYPE_CHANGE_TO, "float"); err != nil {
+	if err := checkOperType(arg, operTypeChangeTo, "float"); err != nil {
 		return nil, err
 	}
 
@@ -160,7 +160,7 @@ func (o *TokenOperator) funcInt(argList []*TokenNode) (*TokenNode, error) {
 	}
 
 	arg := argList[0]
-	if err := checkOperType(arg, OPER_TYPE_CHANGE_TO, "int"); err != nil {
+	if err := checkOperType(arg, operTypeChangeTo, "int"); err != nil {
 		return nil, err
 	}
 
@@ -212,7 +212,7 @@ func (o *TokenOperator) funcRegexMatch(argList []*TokenNode) (*TokenNode, error)
 		return nil, getArgNumberError(2, len(argList))
 	}
 
-	if err := batchCheckOperType(argList, OPER_TYPE_REGEX, "regexMatch"); err != nil {
+	if err := batchCheckOperType(argList, operTypeRegex, "regexMatch"); err != nil {
 		return nil, err
 	}
 
@@ -245,7 +245,7 @@ func (o *TokenOperator) funcMin(argList []*TokenNode) (*TokenNode, error) {
 			fmt.Sprintf("min func take at least 2 arg, but give %v", len(argList)))
 	}
 
-	if err := batchCheckOperType(argList, OPER_TYPE_MATH, "min"); err != nil {
+	if err := batchCheckOperType(argList, operTypeMath, "min"); err != nil {
 		return nil, err
 	}
 
@@ -272,7 +272,7 @@ func (o *TokenOperator) funcMax(argList []*TokenNode) (*TokenNode, error) {
 			fmt.Sprintf("max func take at least 2 arg, but give %v", len(argList)))
 	}
 
-	if err := batchCheckOperType(argList, OPER_TYPE_MATH, "max"); err != nil {
+	if err := batchCheckOperType(argList, operTypeMath, "max"); err != nil {
 		return nil, err
 	}
 
@@ -299,7 +299,7 @@ func (o *TokenOperator) funcAbs(argList []*TokenNode) (*TokenNode, error) {
 	}
 
 	arg := argList[0]
-	if err := checkOperType(arg, OPER_TYPE_MATH, "abs"); err != nil {
+	if err := checkOperType(arg, operTypeMath, "abs"); err != nil {
 		return nil, err
 	}
 
@@ -319,7 +319,7 @@ func (o *TokenOperator) funcStartWith(argList []*TokenNode) (*TokenNode, error) 
 		return nil, getArgNumberError(2, len(argList))
 	}
 
-	if err := batchCheckOperType(argList, OPER_TYPE_STRING, "startWith"); err != nil {
+	if err := batchCheckOperType(argList, operTypeString, "startWith"); err != nil {
 		return nil, err
 	}
 
@@ -333,7 +333,7 @@ func (o *TokenOperator) funcEndWith(argList []*TokenNode) (*TokenNode, error) {
 		return nil, getArgNumberError(2, len(argList))
 	}
 
-	if err := batchCheckOperType(argList, OPER_TYPE_STRING, "endWith"); err != nil {
+	if err := batchCheckOperType(argList, operTypeString, "endWith"); err != nil {
 		return nil, err
 	}
 
