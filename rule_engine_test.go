@@ -110,6 +110,9 @@ func TestFuleEngineInteger(t *testing.T) {
 		{"1 % 0", 0, int(ErrRuleEngineDivideByZero)},
 
 		{"1 + 2 - ", 0, int(ErrRuleEngineSyntaxError)},
+
+		{`10 - 3 + 28`, 35, 0},
+		{`10 + 3 - 28`, -15, 0},
 	}
 
 	rt, err := GetNewRuleEngineTest(t, nil, false)
@@ -358,7 +361,7 @@ func TestRuleEngineVar(t *testing.T) {
 		{`{{d1}} * {{d2}}`, 333, 0},
 		{`{{d1}} * {{d2}} - 3.0 == {{int_value2}} * {{value}} / 10`, true, 0},
 		{`{{d1}} * {{d2}} - 3 == {{float_value2}} * {{d1}} - ({{int_value2}} - 3)/ 10.0`, true, 0},
-		{`{{d3}} == {{d2}`, true, 0},
+		{`{{d3}} == {{d2}}`, true, 0},
 	}
 
 	rt, err := GetNewRuleEngineTest(t, params, false)

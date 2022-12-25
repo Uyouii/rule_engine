@@ -156,7 +156,7 @@ ADD_EXPR :
 	MUL_EXPR {
 		$$  =  $1
 	}
-	| MUL_EXPR '+' ADD_EXPR {
+	| ADD_EXPR '+' MUL_EXPR {
 		lex := ruleEnginelex.(*RuleEngineLex)
 		node, err := lex.oper.tokenNodeAdd($1, $3)
 		if err != nil {
@@ -164,7 +164,7 @@ ADD_EXPR :
 		}
 		$$ = node
 	}
-	| MUL_EXPR '-' ADD_EXPR {
+	| ADD_EXPR '-' MUL_EXPR {
 		lex := ruleEnginelex.(*RuleEngineLex)
 		node, err := lex.oper.tokenNodeSub($1, $3)
 		if err != nil {
@@ -177,7 +177,7 @@ MUL_EXPR :
 	UNARY_EXPR {
 		$$ = $1
 	}
-	| UNARY_EXPR '*' MUL_EXPR {
+	| MUL_EXPR '*' UNARY_EXPR {
 		lex := ruleEnginelex.(*RuleEngineLex)
 		node, err := lex.oper.tokenNodeMul($1, $3)
 		if err != nil {
@@ -185,7 +185,7 @@ MUL_EXPR :
 		}
 		$$ = node
 	}
-	| UNARY_EXPR '/' MUL_EXPR {
+	| MUL_EXPR '/' UNARY_EXPR {
 		lex := ruleEnginelex.(*RuleEngineLex)
 		node, err := lex.oper.tokenNodeDiv($1, $3)
 		if err != nil {
@@ -193,7 +193,7 @@ MUL_EXPR :
 		}
 		$$ = node
 	}
-	| UNARY_EXPR '%' MUL_EXPR {
+	| MUL_EXPR '%' UNARY_EXPR {
 		lex := ruleEnginelex.(*RuleEngineLex)
 		node, err := lex.oper.tokenNodeMod($1, $3)
 		if err != nil {
