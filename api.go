@@ -46,7 +46,11 @@ type Param struct {
 	Value interface{}
 }
 
-func GetParam(key string, valueType ValueType, value interface{}) *Param {
+func GetParam(key string, value interface{}) *Param {
+	return &Param{Key: key, Value: value}
+}
+
+func GetParamWithType(key string, valueType ValueType, value interface{}) *Param {
 	return &Param{Key: key, Type: valueType, Value: value}
 }
 

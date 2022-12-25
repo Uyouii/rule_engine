@@ -328,18 +328,18 @@ func TestRuleEngineFunc(t *testing.T) {
 
 func TestRuleEngineVar(t *testing.T) {
 	params := []*Param{
-		GetParam("value", ValueTypeInteger, 100),
-		GetParam("int_value2", 0, 33),
-		GetParam("float_value", ValueTypeFloat, 5.5),
-		GetParam("float_value2", 0, 3.33),
-		GetParam("str_value", ValueTypeString, "test"),
-		GetParam("true_value", 0, true),
-		GetParam("false_value", 0, false),
-		GetParam("a.b.c", 0, 10),
-		GetParam("a.1", ValueTypeInteger, int64(1)),
-		GetParam("d1", ValueTypeDecimal, decimal.NewFromInt(100)),
-		GetParam("d2", 0, decimal.NewFromFloat(3.33)),
-		GetParam("d3", ValueTypeDecimal, "3.33"),
+		GetParamWithType("value", ValueTypeInteger, 100),
+		GetParam("int_value2", 33),
+		GetParamWithType("float_value", ValueTypeFloat, 5.5),
+		GetParam("float_value2", 3.33),
+		GetParamWithType("str_value", ValueTypeString, "test"),
+		GetParam("true_value", true),
+		GetParam("false_value", false),
+		GetParam("a.b.c", 10),
+		GetParamWithType("a.1", ValueTypeInteger, int64(1)),
+		GetParamWithType("d1", ValueTypeDecimal, decimal.NewFromInt(100)),
+		GetParam("d2", decimal.NewFromFloat(3.33)),
+		GetParamWithType("d3", ValueTypeDecimal, "3.33"),
 	}
 
 	checkList := []CheckUnit{
@@ -401,12 +401,12 @@ func TestRuleEngineRegexMatch(t *testing.T) {
 
 func TestRuleEngineIfElse(t *testing.T) {
 	params := []*Param{
-		GetParam("x", ValueTypeInteger, int64(100)),
-		GetParam("y", ValueTypeFloat, 50),
-		GetParam("COUNTRY", ValueTypeString, "CN"),
-		GetParam("field1", ValueTypeInteger, 2),
-		GetParam("field2", ValueTypeFloat, 7.2),
-		GetParam("field3", ValueTypeString, "Hel"),
+		GetParamWithType("x", ValueTypeInteger, int64(100)),
+		GetParamWithType("y", ValueTypeFloat, 50),
+		GetParamWithType("COUNTRY", ValueTypeString, "CN"),
+		GetParamWithType("field1", ValueTypeInteger, 2),
+		GetParamWithType("field2", ValueTypeFloat, 7.2),
+		GetParamWithType("field3", ValueTypeString, "Hel"),
 	}
 
 	checkList := []CheckUnit{
@@ -452,12 +452,12 @@ func BenchmarkRule(b *testing.B) {
 	}
 
 	params := []*Param{
-		GetParam("x", ValueTypeInteger, int64(100)),
-		GetParam("y", ValueTypeInteger, 50),
-		GetParam("COUNTRY", ValueTypeString, "CN"),
-		GetParam("field1", ValueTypeInteger, int64(2)),
-		GetParam("field2", ValueTypeFloat, 7.2),
-		GetParam("field3", ValueTypeString, "Hel"),
+		GetParamWithType("x", ValueTypeInteger, int64(100)),
+		GetParamWithType("y", ValueTypeInteger, 50),
+		GetParamWithType("COUNTRY", ValueTypeString, "CN"),
+		GetParamWithType("field1", ValueTypeInteger, int64(2)),
+		GetParamWithType("field2", ValueTypeFloat, 7.2),
+		GetParamWithType("field3", ValueTypeString, "Hel"),
 	}
 	rt, err := GetNewRuleEngineTest(b, params, false)
 	if err != nil {
