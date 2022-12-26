@@ -33,7 +33,7 @@ const DEBUG = false
 
 func (rt *RuleEngineTest) check(checkCase *CheckUnit) {
 	res, err := rt.praser.Parse(checkCase.str)
-	if err != nil && err.(*EngineErr).ErrCode != checkCase.errCode {
+	if err != nil && err.(*engineErr).errCode != checkCase.errCode {
 		rt.t.Fatalf("check errcode failed, input: %v, res_err: %v, expect_err_code: %v",
 			checkCase.str, err, checkCase.errCode)
 		return

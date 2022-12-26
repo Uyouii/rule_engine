@@ -12,7 +12,7 @@ import (
 type RuleEngineLex struct {
 	str     string
 	pos     int
-	err     *EngineErr
+	err     *engineErr
 	resNode *TokenNode
 	oper    *TokenOperator
 }
@@ -28,8 +28,8 @@ func (lex *RuleEngineLex) setErr(err error) int {
 	if err == nil {
 		return Success
 	}
-	lex.err = err.(*EngineErr)
-	return int(lex.err.ErrCode)
+	lex.err = err.(*engineErr)
+	return int(lex.err.errCode)
 }
 
 func (lex *RuleEngineLex) matchRule(str string) (int, string) {
@@ -128,7 +128,7 @@ func (lex *RuleEngineLex) Error(s string) {
 
 func (lex *RuleEngineLex) getErrCode() int {
 	if lex.err != nil {
-		return int(lex.err.ErrCode)
+		return int(lex.err.errCode)
 	}
 	return 0
 }

@@ -10,6 +10,10 @@ type Praser struct {
 	operator *TokenOperator
 }
 
+// if need use decimal to handle float, set useDecimal: true
+// if don't require decimal, can set useDeicimal: false, will use float in calculate.
+// if not spefic the type in params, Praser will try to prase the type from value.
+// if spefic the type in params, Praser will use this type and analyze the value.
 func GetNewPraser(params []*Param, useDecimal bool) (*Praser, error) {
 	oper := &TokenOperator{
 		decimalMode: useDecimal,
@@ -29,8 +33,6 @@ func GetNewPraser(params []*Param, useDecimal bool) (*Praser, error) {
 	return &Praser{operator: oper}, nil
 }
 
-// TODO: add catch panic
-// if want use decimal to handle float, can set use Decimal
 func (p *Praser) Parse(str string) (*TokenNode, error) {
 	lex := NewRuleEngineLex(str, p.operator)
 

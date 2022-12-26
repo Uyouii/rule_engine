@@ -38,15 +38,15 @@ var ERROR_MSG_MAP = map[int]string{
 	ErrRuleEngineDecimalError:           "error handle decimal",
 }
 
-type EngineErr struct {
-	ErrCode int
-	ErrMsg  string
+type engineErr struct {
+	errCode int
+	errMsg  string
 }
 
-func (t *EngineErr) Error() string {
-	return fmt.Sprintf("[err]: code %v, %v, [err_msg]: %v", t.ErrCode, ERROR_MSG_MAP[t.ErrCode], t.ErrMsg)
+func (t *engineErr) Error() string {
+	return fmt.Sprintf("[err]: code %v, %v, [err_msg]: %v", t.errCode, ERROR_MSG_MAP[t.errCode], t.errMsg)
 }
 
-func GetError(code int, msg string) *EngineErr {
-	return &EngineErr{ErrCode: code, ErrMsg: msg}
+func GetError(code int, msg string) *engineErr {
+	return &engineErr{errCode: code, errMsg: msg}
 }

@@ -79,7 +79,7 @@ func checkFiledType(t *TokenNode, valueType_list []ValueType) error {
 			return nil
 		}
 	}
-	return &EngineErr{ErrCode: ErrRuleEngineInvalidOperation}
+	return &engineErr{errCode: ErrRuleEngineInvalidOperation}
 }
 
 func batchCheckFieldType(token_list []*TokenNode, valueType_list []ValueType) error {
