@@ -1,6 +1,6 @@
 # Rule Engine By Go
 
-The rule engine implemented with go-yacc, which supports the input of variable parameters, parsing the calculation string and calculating the result.
+The rule engine is implemented with go-yacc, which supports the input of variable parameters, parsing the calculation string and calculating the result.
 
 
 ## Install
@@ -232,7 +232,7 @@ max(int, float, deciamal) = decimal
 | `==`            | Equal             | ALL                 |
 | `!=`            | NotEqual          | ALL                 |
 | `and` `&&`      | And               | bool                |
-| `or` `||`       | Or                | bool                |
+| `||` `or`       | Or                | bool                |
 | `x if c else y` | Ternary operator  | ALL, `c` must bool  |
 
 #### Operator Priority
@@ -286,7 +286,6 @@ the variable type can be `int`, `float`, `decimal`, `bool`, `string`
 | float()       | change arg to float type            |
 | decimal()     | change arg to decimal type          |
 | string()      | change arg to string type           |
-|               |                                     |
 
 #### len()
 
