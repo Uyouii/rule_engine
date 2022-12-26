@@ -8,40 +8,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func getInt(t *TokenNode) int64 {
-	return t.Value.(int64)
-}
-
-func getBool(t *TokenNode) bool {
-	return t.Value.(bool)
-}
-
-func getFloat(t *TokenNode) float64 {
-	switch t.ValueType {
-	case ValueTypeInteger:
-		return float64(getInt(t))
-	case ValueTypeFloat:
-		return t.Value.(float64)
-	}
-	panic("invalid operation")
-}
-
-func getDecimal(t *TokenNode) decimal.Decimal {
-	switch t.ValueType {
-	case ValueTypeInteger:
-		return decimal.NewFromInt(t.Value.(int64))
-	case ValueTypeFloat:
-		return decimal.NewFromFloat(t.Value.(float64))
-	case ValueTypeDecimal:
-		return t.Value.(decimal.Decimal)
-	}
-	panic("invalid operation")
-}
-
-func getString(t *TokenNode) string {
-	return t.Value.(string)
-}
-
 func isFloatEqual(x, y float64) bool {
 	return math.Abs(x-y) < 0.00000000001
 }
@@ -116,13 +82,13 @@ func getArgNumberError(needArg int, giveArg int) error {
 	return GetError(ErrRuleEngineFuncArgument, fmt.Sprintf("func can only handle %v arg, but give %v", needArg, giveArg))
 }
 
-func parseParam(useDecimal bool, param *Param) error {
+func parseParam(useDecimal bool, param *Param) (*TokenNode, error) {
 	rt := reflect.ValueOf(param.Value)
 	if !rt.IsValid() {
-		return GetError(ErrRuleEngineInvalidParam, "not valid")
+		return nil, GetError(ErrRuleEngineInvalidParam, "not valid")
 	}
 	if rt.Kind() == reflect.Ptr {
-		return GetError(ErrRuleEngineInvalidParam,
+		return nil, GetError(ErrRuleEngineInvalidParam,
 			fmt.Sprintf("not support point args, params: %v", param.Value))
 	}
 	if rt.Kind() == reflect.Interface {
@@ -132,79 +98,75 @@ func parseParam(useDecimal bool, param *Param) error {
 	notMatchErr := GetError(ErrRuleEngineParamValueTypeNotMatch,
 		fmt.Sprintf("value: %v, type: %v", param.Value, valueTypeNameDict[param.Type]))
 
+	var resType ValueType
+	var resValue interface{}
+
 	switch rt.Kind() {
 	case reflect.Invalid:
-		return GetError(ErrRuleEngineInvalidParam,
+		return nil, GetError(ErrRuleEngineInvalidParam,
 			fmt.Sprintf("invalid params: %v", param.Value))
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch param.Type {
 		case ValueTypeNone, ValueTypeInteger:
-			param.Type = ValueTypeInteger
-			param.Value = rt.Int()
+			resType, resValue = ValueTypeInteger, rt.Int()
 		case ValueTypeDecimal:
-			param.Value = decimal.NewFromInt(rt.Int())
+			resType, resValue = ValueTypeDecimal, decimal.NewFromInt(rt.Int())
 		case ValueTypeFloat:
-			param.Value = float64(rt.Int())
+			resType, resValue = ValueTypeFloat, float64(rt.Int())
 		default:
-			return notMatchErr
+			return nil, notMatchErr
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		switch param.Type {
 		case ValueTypeNone, ValueTypeInteger:
-			param.Type = ValueTypeInteger
-			param.Value = int64(rt.Uint())
+			resType, resValue = ValueTypeInteger, int64(rt.Uint())
 		case ValueTypeFloat:
-			param.Value = float64(rt.Uint())
+			resType, resValue = ValueTypeFloat, float64(rt.Uint())
 		case ValueTypeDecimal:
-			param.Value = decimal.NewFromInt(int64(rt.Uint()))
+			resType, resValue = ValueTypeDecimal, decimal.NewFromInt(int64(rt.Uint()))
 		default:
-			return notMatchErr
+			return nil, notMatchErr
 		}
 	case reflect.Bool:
 		if param.Type != ValueTypeNone && param.Type != ValueTypeBool {
-			return notMatchErr
+			return nil, notMatchErr
 		}
-		param.Type = ValueTypeBool
-		param.Value = rt.Bool()
+		resType, resValue = ValueTypeBool, rt.Bool()
 	case reflect.String:
 		switch param.Type {
 		case ValueTypeNone, ValueTypeString:
-			param.Type = ValueTypeString
-			param.Value = rt.String()
+			resType, resValue = ValueTypeString, rt.String()
 		case ValueTypeDecimal:
 			decimalValue, err := decimal.NewFromString(rt.String())
 			if err != nil {
-				return GetError(ErrRuleEngineDecimalError, fmt.Sprintf("msg: %v", err))
+				return nil, GetError(ErrRuleEngineDecimalError, fmt.Sprintf("msg: %v", err))
 			}
-			param.Value = decimalValue
+			resType, resValue = ValueTypeDecimal, decimalValue
 		default:
-			return notMatchErr
+			return nil, notMatchErr
 		}
 	case reflect.Float32, reflect.Float64:
 		switch param.Type {
 		case ValueTypeNone, ValueTypeFloat:
 			if useDecimal {
-				param.Type = ValueTypeDecimal
-				param.Value = decimal.NewFromFloat(rt.Float())
+				resType, resValue = ValueTypeDecimal, decimal.NewFromFloat(rt.Float())
 			} else {
-				param.Type = ValueTypeFloat
-				param.Value = rt.Float()
+				resType, resValue = ValueTypeFloat, rt.Float()
 			}
 		case ValueTypeDecimal:
-			param.Value = decimal.NewFromFloat(rt.Float())
+			resType, resValue = ValueTypeDecimal, decimal.NewFromFloat(rt.Float())
 		default:
-			return notMatchErr
+			return nil, notMatchErr
 		}
 	case reflect.Struct:
 		value := rt.Interface()
 		decimalValue, ok := value.(decimal.Decimal)
 		if !ok {
-			return GetError(ErrRuleEngineNotSupportedVarType, fmt.Sprintf("value: %v", param.Value))
+			return nil, GetError(ErrRuleEngineNotSupportedVarType, fmt.Sprintf("value: %v", param.Value))
 		}
-		param.Type = ValueTypeDecimal
-		param.Value = decimalValue
+		resType, resValue = ValueTypeDecimal, decimalValue
 	default:
-		return GetError(ErrRuleEngineNotSupportedVarType, fmt.Sprintf("value: %v", param.Value))
+		return nil, GetError(ErrRuleEngineNotSupportedVarType, fmt.Sprintf("value: %v", param.Value))
 	}
-	return nil
+	return GetTokenNode(resType, resValue), nil
 }

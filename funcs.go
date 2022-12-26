@@ -89,13 +89,13 @@ func (o *TokenOperator) funcString(argList []*TokenNode) (*TokenNode, error) {
 
 	switch arg.ValueType {
 	case ValueTypeInteger:
-		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", getInt(arg))), nil
+		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", arg.GetInt())), nil
 	case ValueTypeFloat:
-		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", getFloat(arg))), nil
+		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", arg.GetFloat())), nil
 	case ValueTypeDecimal:
-		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", getDecimal(arg))), nil
+		return GetTokenNode(ValueTypeString, fmt.Sprintf("%v", arg.GetDecimal())), nil
 	case ValueTypeString:
-		return GetTokenNode(ValueTypeString, getString(arg)), nil
+		return GetTokenNode(ValueTypeString, arg.GetString()), nil
 	}
 	return nil, nil
 }
@@ -112,13 +112,13 @@ func (o *TokenOperator) funcDecimal(argList []*TokenNode) (*TokenNode, error) {
 
 	switch arg.ValueType {
 	case ValueTypeInteger:
-		return GetTokenNode(ValueTypeDecimal, decimal.NewFromInt(getInt(arg))), nil
+		return GetTokenNode(ValueTypeDecimal, decimal.NewFromInt(arg.GetInt())), nil
 	case ValueTypeFloat:
-		return GetTokenNode(ValueTypeDecimal, decimal.NewFromFloat(getFloat(arg))), nil
+		return GetTokenNode(ValueTypeDecimal, decimal.NewFromFloat(arg.GetFloat())), nil
 	case ValueTypeDecimal:
-		return GetTokenNode(ValueTypeDecimal, getDecimal(arg)), nil
+		return GetTokenNode(ValueTypeDecimal, arg.GetDecimal()), nil
 	case ValueTypeString:
-		value, err := decimal.NewFromString(getString(arg))
+		value, err := decimal.NewFromString(arg.GetString())
 		if err != nil {
 			return nil, GetError(ErrRuleEngineFuncArgument, fmt.Sprintf("invalid string arg in func decimal, arg: %v", arg.Value))
 		}
@@ -139,13 +139,13 @@ func (o *TokenOperator) funcFloat(argList []*TokenNode) (*TokenNode, error) {
 
 	switch arg.ValueType {
 	case ValueTypeInteger:
-		return GetTokenNode(ValueTypeFloat, float64(getInt(arg))), nil
+		return GetTokenNode(ValueTypeFloat, float64(arg.GetInt())), nil
 	case ValueTypeFloat:
-		return GetTokenNode(ValueTypeFloat, getFloat(arg)), nil
+		return GetTokenNode(ValueTypeFloat, arg.GetFloat()), nil
 	case ValueTypeDecimal:
-		return GetTokenNode(ValueTypeFloat, getDecimal(arg).InexactFloat64()), nil
+		return GetTokenNode(ValueTypeFloat, arg.GetDecimal().InexactFloat64()), nil
 	case ValueTypeString:
-		value, err := strconv.ParseFloat(getString(arg), 64)
+		value, err := strconv.ParseFloat(arg.GetString(), 64)
 		if err != nil {
 			return nil, GetError(ErrRuleEngineFuncArgument, fmt.Sprintf("invalid string arg in func float, arg: %v", arg.Value))
 		}
@@ -166,13 +166,13 @@ func (o *TokenOperator) funcInt(argList []*TokenNode) (*TokenNode, error) {
 
 	switch arg.ValueType {
 	case ValueTypeInteger:
-		return GetTokenNode(ValueTypeInteger, getInt(arg)), nil
+		return GetTokenNode(ValueTypeInteger, arg.GetInt()), nil
 	case ValueTypeFloat:
-		return GetTokenNode(ValueTypeInteger, int64(getFloat(arg))), nil
+		return GetTokenNode(ValueTypeInteger, int64(arg.GetFloat())), nil
 	case ValueTypeDecimal:
-		return GetTokenNode(ValueTypeInteger, getDecimal(arg).IntPart()), nil
+		return GetTokenNode(ValueTypeInteger, arg.GetDecimal().IntPart()), nil
 	case ValueTypeString:
-		value, err := strconv.ParseInt(getString(arg), 0, 64)
+		value, err := strconv.ParseInt(arg.GetString(), 0, 64)
 		if err != nil {
 			return nil, GetError(ErrRuleEngineFuncArgument, fmt.Sprintf("invalid string arg in func int, arg: %v", arg.Value))
 		}
@@ -191,7 +191,7 @@ func (o *TokenOperator) funcLower(argList []*TokenNode) (*TokenNode, error) {
 		return nil, GetError(ErrRuleEngineFuncArgument, "lower func can onle handle string")
 	}
 
-	return GetTokenNode(ValueTypeString, strings.ToLower(getString(arg))), nil
+	return GetTokenNode(ValueTypeString, strings.ToLower(arg.GetString())), nil
 }
 
 func (o *TokenOperator) funcUpper(argList []*TokenNode) (*TokenNode, error) {
@@ -204,7 +204,7 @@ func (o *TokenOperator) funcUpper(argList []*TokenNode) (*TokenNode, error) {
 		return nil, GetError(ErrRuleEngineFuncArgument, "upper func can onle handle string")
 	}
 
-	return GetTokenNode(ValueTypeString, strings.ToUpper(getString(arg))), nil
+	return GetTokenNode(ValueTypeString, strings.ToUpper(arg.GetString())), nil
 }
 
 func (o *TokenOperator) funcRegexMatch(argList []*TokenNode) (*TokenNode, error) {
@@ -216,8 +216,8 @@ func (o *TokenOperator) funcRegexMatch(argList []*TokenNode) (*TokenNode, error)
 		return nil, err
 	}
 
-	pattern := getString(argList[0])
-	s := getString(argList[1])
+	pattern := argList[0].GetString()
+	s := argList[1].GetString()
 
 	matched, err := regexp.MatchString(pattern, s)
 	if err != nil {
@@ -236,7 +236,7 @@ func (o *TokenOperator) funcLen(argList []*TokenNode) (*TokenNode, error) {
 		return nil, GetError(ErrRuleEngineFuncArgument, "len func can onle handle string")
 	}
 
-	return GetTokenNode(ValueTypeInteger, int64(len(getString(arg)))), nil
+	return GetTokenNode(ValueTypeInteger, int64(len(arg.GetString()))), nil
 }
 
 func (o *TokenOperator) funcMin(argList []*TokenNode) (*TokenNode, error) {
@@ -253,12 +253,12 @@ func (o *TokenOperator) funcMin(argList []*TokenNode) (*TokenNode, error) {
 
 	for _, arg := range argList {
 		if res.ValueType == ValueTypeInteger && arg.ValueType == ValueTypeInteger {
-			res.Value = intMin(getInt(res), getInt(arg))
+			res.Value = intMin(res.GetInt(), arg.GetInt())
 		} else if o.decimalMode || res.ValueType == ValueTypeDecimal || arg.ValueType == ValueTypeDecimal {
-			res.Value = decimal.Min(getDecimal(res), getDecimal(arg))
+			res.Value = decimal.Min(res.GetDecimal(), arg.GetDecimal())
 			res.ValueType = ValueTypeDecimal
 		} else {
-			res.Value = math.Min(getFloat(res), getFloat(arg))
+			res.Value = math.Min(res.GetFloat(), arg.GetFloat())
 			res.ValueType = ValueTypeFloat
 		}
 	}
@@ -280,12 +280,12 @@ func (o *TokenOperator) funcMax(argList []*TokenNode) (*TokenNode, error) {
 
 	for _, arg := range argList {
 		if res.ValueType == ValueTypeInteger && arg.ValueType == ValueTypeInteger {
-			res.Value = intMax(getInt(res), getInt(arg))
+			res.Value = intMax(res.GetInt(), arg.GetInt())
 		} else if o.decimalMode || res.ValueType == ValueTypeDecimal || arg.ValueType == ValueTypeDecimal {
-			res.Value = decimal.Max(getDecimal(res), getDecimal(arg))
+			res.Value = decimal.Max(res.GetDecimal(), arg.GetDecimal())
 			res.ValueType = ValueTypeDecimal
 		} else {
-			res.Value = math.Max(getFloat(res), getFloat(arg))
+			res.Value = math.Max(res.GetFloat(), arg.GetFloat())
 			res.ValueType = ValueTypeFloat
 		}
 	}
@@ -305,11 +305,11 @@ func (o *TokenOperator) funcAbs(argList []*TokenNode) (*TokenNode, error) {
 
 	switch arg.ValueType {
 	case ValueTypeInteger:
-		return GetTokenNode(ValueTypeInteger, intAbs(getInt(arg))), nil
+		return GetTokenNode(ValueTypeInteger, intAbs(arg.GetInt())), nil
 	case ValueTypeFloat:
-		return GetTokenNode(ValueTypeFloat, math.Abs(getFloat(arg))), nil
+		return GetTokenNode(ValueTypeFloat, math.Abs(arg.GetFloat())), nil
 	case ValueTypeDecimal:
-		return GetTokenNode(ValueTypeDecimal, getDecimal(arg).Abs()), nil
+		return GetTokenNode(ValueTypeDecimal, arg.GetDecimal().Abs()), nil
 	}
 	return nil, nil
 }

@@ -81,6 +81,7 @@ const (
 )
 
 var valueTypeNameDict = map[ValueType]string{
+	ValueTypeNone:    "null",
 	ValueTypeBool:    "bool",
 	ValueTypeFloat:   "float",
 	ValueTypeString:  "string",

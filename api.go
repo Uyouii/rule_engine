@@ -1,7 +1,7 @@
 package rule_engine
 
 import (
-	"reflect"
+	"fmt"
 
 	"github.com/shopspring/decimal"
 )
@@ -17,18 +17,18 @@ type Praser struct {
 func GetNewPraser(params []*Param, useDecimal bool) (*Praser, error) {
 	oper := &TokenOperator{
 		decimalMode: useDecimal,
-		paramMap:    make(map[string]*Param),
+		varMap:      make(map[string]*TokenNode),
 	}
 
 	for _, param := range params {
 		if param == nil {
 			continue
 		}
-		err := parseParam(useDecimal, param)
+		node, err := parseParam(useDecimal, param)
 		if err != nil {
 			return nil, err
 		}
-		oper.paramMap[param.Key] = param
+		oper.varMap[param.Name] = node
 	}
 	return &Praser{operator: oper}, nil
 }
@@ -42,23 +42,32 @@ func (p *Praser) Parse(str string) (*TokenNode, error) {
 	return nil, lex.err
 }
 
+func (p *Praser) CheckValue(node *TokenNode, v interface{}) bool {
+	param := &Param{Value: v}
+	vnode, err := parseParam(p.operator.decimalMode, param)
+	if err != nil {
+		return false
+	}
+	return node.Compare(vnode)
+}
+
 type Param struct {
-	Key   string
-	Type  ValueType
-	Value interface{}
+	Name  string      // value name
+	Type  ValueType   // value type
+	Value interface{} // value
 }
 
 func GetParam(key string, value interface{}) *Param {
-	return &Param{Key: key, Value: value}
+	return &Param{Name: key, Value: value}
 }
 
 func GetParamWithType(key string, valueType ValueType, value interface{}) *Param {
-	return &Param{Key: key, Type: valueType, Value: value}
+	return &Param{Name: key, Type: valueType, Value: value}
 }
 
 type TokenNode struct {
-	ValueType ValueType
-	Value     interface{}
+	ValueType ValueType   // result type, can see ValueType
+	Value     interface{} // result value
 }
 
 func GetTokenNode(valueType ValueType, value interface{}) *TokenNode {
@@ -69,78 +78,92 @@ func (t *TokenNode) GetValue() interface{} {
 	return t.Value
 }
 
-func (t *TokenNode) CheckValue(v interface{}) bool {
-	rt := reflect.ValueOf(v)
-	if !rt.IsValid() {
-		return false
+func (t *TokenNode) GetInt() int64 {
+	switch t.ValueType {
+	case ValueTypeInteger:
+		return t.Value.(int64)
+	case ValueTypeFloat:
+		return int64(t.Value.(float64))
+	case ValueTypeDecimal:
+		return t.GetDecimal().IntPart()
 	}
-	if rt.Kind() == reflect.Ptr {
-		rt = rt.Elem()
+	panic(fmt.Sprintf("invalid type change, from %v to int, value: %v",
+		valueTypeNameDict[t.ValueType], t.Value))
+}
+
+func (t *TokenNode) GetBool() bool {
+	switch t.ValueType {
+	case ValueTypeBool:
+		return t.Value.(bool)
 	}
-	if rt.Kind() == reflect.Interface {
-		rt = reflect.ValueOf(rt.Interface())
+	panic(fmt.Sprintf("invalid type change, from %v to bool, value: %v",
+		valueTypeNameDict[t.ValueType], t.Value))
+}
+
+func (t *TokenNode) GetFloat() float64 {
+	switch t.ValueType {
+	case ValueTypeInteger:
+		return float64(t.GetInt())
+	case ValueTypeFloat:
+		return t.Value.(float64)
+	case ValueTypeDecimal:
+		return t.GetDecimal().InexactFloat64()
 	}
+	panic(fmt.Sprintf("invalid type change, from %v to bool, value: %v",
+		valueTypeNameDict[t.ValueType], t.Value))
+}
+
+func (t *TokenNode) GetDecimal() decimal.Decimal {
+	switch t.ValueType {
+	case ValueTypeInteger:
+		return decimal.NewFromInt(t.Value.(int64))
+	case ValueTypeFloat:
+		return decimal.NewFromFloat(t.Value.(float64))
+	case ValueTypeDecimal:
+		return t.Value.(decimal.Decimal)
+	}
+	panic(fmt.Sprintf("invalid type change, from %v to bool, value: %v",
+		valueTypeNameDict[t.ValueType], t.Value))
+}
+
+func (t *TokenNode) GetString() string {
 	switch t.ValueType {
 	case ValueTypeString:
-		if rt.Kind() != reflect.String {
+		return t.Value.(string)
+	default:
+		return fmt.Sprintf("%v", t.Value)
+	}
+}
+
+func (x *TokenNode) Compare(y *TokenNode) bool {
+	if x.ValueType == ValueTypeNone || y.ValueType == ValueTypeNone {
+		return false
+	}
+
+	if x.ValueType == ValueTypeBool || y.ValueType == ValueTypeBool {
+		if x.ValueType != ValueTypeBool || y.ValueType != ValueTypeBool {
 			return false
 		}
-		return rt.String() == t.Value.(string)
-	case ValueTypeInteger:
-		switch rt.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return t.Value.(int64) == rt.Int()
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return t.Value.(int64) == int64(rt.Uint())
-		case reflect.Struct:
-			decimalValue, ok := v.(decimal.Decimal)
-			if !ok {
-				return false
-			}
-			return getDecimal(t).Equal(decimalValue)
-		default:
+		return x.GetBool() == y.GetBool()
+	}
+
+	if x.ValueType == ValueTypeString || y.ValueType == ValueTypeString {
+		if x.ValueType != ValueTypeString || y.ValueType != ValueTypeString {
 			return false
 		}
-	case ValueTypeFloat:
-		switch rt.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return t.Value.(float64) == float64(rt.Int())
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return t.Value.(float64) == float64(rt.Uint())
-		case reflect.Float32, reflect.Float64:
-			return isFloatEqual(t.Value.(float64), rt.Float())
-		case reflect.Struct:
-			decimalValue, ok := v.(decimal.Decimal)
-			if !ok {
-				return false
-			}
-			return getDecimal(t).Equal(decimalValue)
-		default:
-			return false
-		}
-	case ValueTypeBool:
-		if checkValue, ok := v.(bool); !ok {
-			return false
-		} else {
-			return t.Value.(bool) == checkValue
-		}
-	case ValueTypeDecimal:
-		switch rt.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return decimal.NewFromInt(rt.Int()).Equal(getDecimal(t))
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return decimal.NewFromInt(int64(rt.Uint())).Equal(getDecimal(t))
-		case reflect.Float32, reflect.Float64:
-			return decimal.NewFromFloat(rt.Float()).Equal(getDecimal(t))
-		case reflect.Struct:
-			decimalValue, ok := v.(decimal.Decimal)
-			if !ok {
-				return false
-			}
-			return decimalValue.Equal(getDecimal(t))
-		default:
-			return false
-		}
+		return x.GetString() == y.GetString()
+	}
+
+	if x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
+		return x.GetDecimal().Equal(y.GetDecimal())
+	}
+
+	if x.ValueType == ValueTypeFloat || y.ValueType == ValueTypeFloat {
+		return isFloatEqual(x.GetFloat(), y.GetFloat())
+	}
+
+	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
+		return x.GetInt() == y.GetInt()
 	}
 	return false
 }

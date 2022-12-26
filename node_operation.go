@@ -6,7 +6,7 @@ import (
 
 type TokenOperator struct {
 	decimalMode bool
-	paramMap    map[string]*Param
+	varMap      map[string]*TokenNode
 }
 
 func (o *TokenOperator) tokenNodeAdd(x, y *TokenNode) (*TokenNode, error) {
@@ -15,15 +15,15 @@ func (o *TokenOperator) tokenNodeAdd(x, y *TokenNode) (*TokenNode, error) {
 	}
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
-		return GetTokenNode(ValueTypeInteger, getInt(x)+getInt(y)), nil
+		return GetTokenNode(ValueTypeInteger, x.GetInt()+y.GetInt()), nil
 	}
 
 	if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
-		res := getDecimal(x).Add(getDecimal(y))
+		res := x.GetDecimal().Add(y.GetDecimal())
 		return GetTokenNode(ValueTypeDecimal, res), nil
 	}
 
-	return GetTokenNode(ValueTypeFloat, getFloat(x)+getFloat(y)), nil
+	return GetTokenNode(ValueTypeFloat, x.GetFloat()+y.GetFloat()), nil
 }
 
 func (o *TokenOperator) tokenNodeSub(x, y *TokenNode) (*TokenNode, error) {
@@ -32,15 +32,15 @@ func (o *TokenOperator) tokenNodeSub(x, y *TokenNode) (*TokenNode, error) {
 	}
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
-		return GetTokenNode(ValueTypeInteger, getInt(x)-getInt(y)), nil
+		return GetTokenNode(ValueTypeInteger, x.GetInt()-y.GetInt()), nil
 	}
 
 	if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
-		res := getDecimal(x).Sub(getDecimal(y))
+		res := x.GetDecimal().Sub(y.GetDecimal())
 		return GetTokenNode(ValueTypeDecimal, res), nil
 	}
 
-	return GetTokenNode(ValueTypeFloat, getFloat(x)-getFloat(y)), nil
+	return GetTokenNode(ValueTypeFloat, x.GetFloat()-y.GetFloat()), nil
 }
 
 func (o *TokenOperator) tokenNodeMul(x, y *TokenNode) (*TokenNode, error) {
@@ -49,15 +49,15 @@ func (o *TokenOperator) tokenNodeMul(x, y *TokenNode) (*TokenNode, error) {
 	}
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
-		return GetTokenNode(ValueTypeInteger, getInt(x)*getInt(y)), nil
+		return GetTokenNode(ValueTypeInteger, x.GetInt()*y.GetInt()), nil
 	}
 
 	if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
-		res := getDecimal(x).Mul(getDecimal(y))
+		res := x.GetDecimal().Mul(y.GetDecimal())
 		return GetTokenNode(ValueTypeDecimal, res), nil
 	}
 
-	return GetTokenNode(ValueTypeFloat, getFloat(x)*getFloat(y)), nil
+	return GetTokenNode(ValueTypeFloat, x.GetFloat()*y.GetFloat()), nil
 }
 
 func (o *TokenOperator) tokenNodeDiv(x, y *TokenNode) (*TokenNode, error) {
@@ -65,20 +65,20 @@ func (o *TokenOperator) tokenNodeDiv(x, y *TokenNode) (*TokenNode, error) {
 		return nil, err
 	}
 
-	if getDecimal(y).IsZero() {
+	if y.GetDecimal().IsZero() {
 		return nil, GetError(ErrRuleEngineDivideByZero, "divide by zero")
 	}
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
-		return GetTokenNode(ValueTypeInteger, getInt(x)/getInt(y)), nil
+		return GetTokenNode(ValueTypeInteger, x.GetInt()/y.GetInt()), nil
 	}
 
 	if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
-		res := getDecimal(x).Div(getDecimal(y))
+		res := x.GetDecimal().Div(y.GetDecimal())
 		return GetTokenNode(ValueTypeDecimal, res), nil
 	}
 
-	return GetTokenNode(ValueTypeFloat, getFloat(x)/getFloat(y)), nil
+	return GetTokenNode(ValueTypeFloat, x.GetFloat()/y.GetFloat()), nil
 }
 
 func (o *TokenOperator) tokenNodeMod(x, y *TokenNode) (*TokenNode, error) {
@@ -86,11 +86,11 @@ func (o *TokenOperator) tokenNodeMod(x, y *TokenNode) (*TokenNode, error) {
 		return nil, err
 	}
 
-	if getInt(y) == 0 {
+	if y.GetInt() == 0 {
 		return nil, GetError(ErrRuleEngineDivideByZero, "divide by zero")
 	}
 
-	return GetTokenNode(ValueTypeInteger, getInt(x)%getInt(y)), nil
+	return GetTokenNode(ValueTypeInteger, x.GetInt()%y.GetInt()), nil
 }
 
 func (o *TokenOperator) tokenNodeMinus(t *TokenNode) (*TokenNode, error) {
@@ -100,16 +100,16 @@ func (o *TokenOperator) tokenNodeMinus(t *TokenNode) (*TokenNode, error) {
 	res := &TokenNode{ValueType: t.ValueType}
 	switch t.ValueType {
 	case ValueTypeInteger:
-		res.Value = -getInt(t)
+		res.Value = -t.GetInt()
 	case ValueTypeFloat:
 		if o.decimalMode {
-			res.Value = getDecimal(t).Neg()
+			res.Value = t.GetDecimal().Neg()
 			res.ValueType = ValueTypeDecimal
 		} else {
-			res.Value = -getFloat(t)
+			res.Value = -t.GetFloat()
 		}
 	case ValueTypeDecimal:
-		res.Value = getDecimal(t).Neg()
+		res.Value = t.GetDecimal().Neg()
 	}
 	return res, nil
 }
@@ -125,14 +125,14 @@ func (o *TokenOperator) tokenNodeGreater(x, y *TokenNode) (*TokenNode, error) {
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
 		// integer
-		res.Value = getInt(x) > getInt(y)
+		res.Value = x.GetInt() > y.GetInt()
 	} else if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
 		// decimal
-		res.Value = getDecimal(x).GreaterThan(getDecimal(y))
+		res.Value = x.GetDecimal().GreaterThan(y.GetDecimal())
 		return res, nil
 	} else {
 		// float
-		res.Value = getFloat(x) > getFloat(y)
+		res.Value = x.GetFloat() > y.GetFloat()
 	}
 
 	return res, nil
@@ -149,14 +149,14 @@ func (o *TokenOperator) tokenNodeLess(x, y *TokenNode) (*TokenNode, error) {
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
 		// integer
-		res.Value = getInt(x) < getInt(y)
+		res.Value = x.GetInt() < y.GetInt()
 	} else if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
 		// decimal
-		res.Value = getDecimal(x).LessThan(getDecimal(y))
+		res.Value = x.GetDecimal().LessThan(y.GetDecimal())
 		return res, nil
 	} else {
 		// float
-		res.Value = getFloat(x) < getFloat(y)
+		res.Value = x.GetFloat() < y.GetFloat()
 	}
 
 	return res, nil
@@ -173,14 +173,14 @@ func (o *TokenOperator) tokenNodeGreaterEqual(x, y *TokenNode) (*TokenNode, erro
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
 		// integer
-		res.Value = getInt(x) >= getInt(y)
+		res.Value = x.GetInt() >= y.GetInt()
 	} else if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
 		// decimal
-		res.Value = getDecimal(x).GreaterThanOrEqual(getDecimal(y))
+		res.Value = x.GetDecimal().GreaterThanOrEqual(y.GetDecimal())
 		return res, nil
 	} else {
 		// float
-		res.Value = getFloat(x) >= getFloat(y)
+		res.Value = x.GetFloat() >= y.GetFloat()
 	}
 
 	return res, nil
@@ -197,14 +197,14 @@ func (o *TokenOperator) tokenNodeLessEqual(x, y *TokenNode) (*TokenNode, error) 
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
 		// integer
-		res.Value = getInt(x) <= getInt(y)
+		res.Value = x.GetInt() <= y.GetInt()
 	} else if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
 		// decimal
-		res.Value = getDecimal(x).LessThanOrEqual(getDecimal(y))
+		res.Value = x.GetDecimal().LessThanOrEqual(y.GetDecimal())
 		return res, nil
 	} else {
 		// float
-		res.Value = getFloat(x) <= getFloat(y)
+		res.Value = x.GetFloat() <= y.GetFloat()
 	}
 
 	return res, nil
@@ -223,7 +223,7 @@ func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
 			err.(*EngineErr).ErrMsg = "invalid equal operation for bool value with other type"
 			return nil, err
 		}
-		res.Value = getBool(x) == getBool(y)
+		res.Value = x.GetBool() == y.GetBool()
 		return res, nil
 	}
 
@@ -233,20 +233,20 @@ func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
 			err.(*EngineErr).ErrMsg = "invalid equal operation for string value with other type"
 			return nil, err
 		}
-		res.Value = getString(x) == getString(y)
+		res.Value = x.GetString() == y.GetString()
 		return res, nil
 	}
 
 	if x.ValueType == ValueTypeInteger && y.ValueType == ValueTypeInteger {
 		// integer
-		res.Value = getInt(x) == getInt(y)
+		res.Value = x.GetInt() == y.GetInt()
 	} else if o.decimalMode || x.ValueType == ValueTypeDecimal || y.ValueType == ValueTypeDecimal {
 		// decimal
-		res.Value = getDecimal(x).Equal(getDecimal(y))
+		res.Value = x.GetDecimal().Equal(y.GetDecimal())
 		return res, nil
 	} else {
 		// float
-		res.Value = isFloatEqual(getFloat(x), getFloat(y))
+		res.Value = isFloatEqual(x.GetFloat(), y.GetFloat())
 	}
 
 	return res, nil
@@ -259,7 +259,7 @@ func (o *TokenOperator) tokenNodeNotEqual(x, y *TokenNode) (*TokenNode, error) {
 
 	res, err := o.tokenNodeEqual(x, y)
 	if err == nil {
-		res.Value = !getBool(res)
+		res.Value = !res.GetBool()
 	}
 	return res, err
 }
@@ -269,7 +269,7 @@ func (o *TokenOperator) tokenNodeAnd(x, y *TokenNode) (*TokenNode, error) {
 		return nil, err
 	}
 
-	return GetTokenNode(ValueTypeBool, getBool(x) && getBool(y)), nil
+	return GetTokenNode(ValueTypeBool, x.GetBool() && y.GetBool()), nil
 }
 
 func (o *TokenOperator) tokenNodeOr(x, y *TokenNode) (*TokenNode, error) {
@@ -277,7 +277,7 @@ func (o *TokenOperator) tokenNodeOr(x, y *TokenNode) (*TokenNode, error) {
 		return nil, err
 	}
 
-	return GetTokenNode(ValueTypeBool, getBool(x) || getBool(y)), nil
+	return GetTokenNode(ValueTypeBool, x.GetBool() || y.GetBool()), nil
 }
 
 func (o *TokenOperator) tokenNodeNot(t *TokenNode) (*TokenNode, error) {
@@ -285,16 +285,16 @@ func (o *TokenOperator) tokenNodeNot(t *TokenNode) (*TokenNode, error) {
 		return nil, err
 	}
 
-	return GetTokenNode(ValueTypeBool, !getBool(t)), nil
+	return GetTokenNode(ValueTypeBool, !t.GetBool()), nil
 }
 
 func (o *TokenOperator) tokenNodeVarName(varNameToken *TokenNode, identifier *TokenNode) (*TokenNode, error) {
 	res := &TokenNode{ValueType: ValueTypeString}
 	switch identifier.ValueType {
 	case ValueTypeString:
-		res.Value = fmt.Sprintf("%v.%v", getString(varNameToken), getString(identifier))
+		res.Value = fmt.Sprintf("%v.%v", varNameToken.Value, identifier.Value)
 	case ValueTypeInteger:
-		res.Value = fmt.Sprintf("%v.%v", getString(varNameToken), getInt(identifier))
+		res.Value = fmt.Sprintf("%v.%v", varNameToken.Value, identifier.Value)
 	default:
 		return nil, GetError(ErrRuleEngineSyntaxError, fmt.Sprintf("syntax error, var: %v", identifier.Value))
 	}
@@ -306,16 +306,16 @@ func (o *TokenOperator) tokenNodeVar(t *TokenNode) (*TokenNode, error) {
 
 	unknownVarErr := GetError(ErrRuleEngineUnknownVarName, fmt.Sprintf("unknown var name: %v", varName))
 
-	if o.paramMap == nil {
+	if o.varMap == nil {
 		return nil, unknownVarErr
 	}
 
-	param, ok := o.paramMap[varName]
+	variable, ok := o.varMap[varName]
 	if !ok {
 		return nil, unknownVarErr
 	}
 
-	return &TokenNode{ValueType: param.Type, Value: param.Value}, nil
+	return GetTokenNode(variable.ValueType, variable.Value), nil
 }
 
 func (o *TokenOperator) tokenNodeThirdOper(x *TokenNode, c *TokenNode, y *TokenNode) (*TokenNode, error) {
@@ -328,7 +328,7 @@ func (o *TokenOperator) tokenNodeThirdOper(x *TokenNode, c *TokenNode, y *TokenN
 		return nil, err
 	}
 
-	condition := getBool(c)
+	condition := c.GetBool()
 
 	if condition {
 		return x, nil

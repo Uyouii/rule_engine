@@ -45,7 +45,7 @@ func (rt *RuleEngineTest) check(checkCase *CheckUnit) {
 		}
 		return
 	}
-	if !res.CheckValue(checkCase.res) {
+	if !rt.praser.CheckValue(res, checkCase.res) {
 		rt.t.Fatalf("check res value failed, input: %v, res_value: %v, expect_value: %v",
 			checkCase.str, res.GetValue(), checkCase.res)
 		return
