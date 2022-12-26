@@ -1,21 +1,21 @@
 # Rule Engine By Go
 
-The rule engine is implemented with go-yacc,  parsing the calculation string and calculating the result. It sas supported input variables, arithmetic operations, logical operations, decimal float and some built-in functions, which will be extended later as needed.
+通过go-yacc实现的规则引擎，解析算式并计算得到结果。支持输入自定义参数，算数运算，逻辑运算，deciaml和一些内置函数（后续会根据需要扩展）。
 
 
-## Install
+## 安装
 
 ```sh
 go get github.com/uyouii/rule_engine
 ```
 
-## Requirements
+## 要求
 
 rule_engine library requires Go version `>=1.7`
 
-## Usage
+## 示例
 
-example project: [rule_engine_example](https://github.com/Uyouii/rule_engine_example)
+示例项目： [rule_engine_example](https://github.com/Uyouii/rule_engine_example)
 
 ```go
 package main
@@ -80,7 +80,7 @@ func main() {
 
 ```
 
-**Output**
+**输出**
 
 ```sh
 4 * (2 + 3) - 5 * 3  --> 5
@@ -101,11 +101,11 @@ int({{i}} / {{f}})  --> 28
 {{d}} * 10 if len({{s}}) > 10 else {{f}} / 10  --> 33
 ```
 
-## Go Documentation
+## go pkg 文档
 
 https://pkg.go.dev/github.com/uyouii/rule_engine
 
-## API
+## 接口
 
 ```go
 // 1. use GetNewPraser to get a New Praser
@@ -124,9 +124,9 @@ fmt.Printf(res.Value)
 2
 ```
 
-#### Set Param
+#### 设置变量
 
-When set the struct Param:
+Param用作向Praser传递变量：
 
 ```go
 type Param struct {
@@ -136,7 +136,7 @@ type Param struct {
 }
 ```
 
-if only set `Name`and `Value`, then `Praser` will try to parse the `Type` from `Value`
+如果只设置 `Name`and `Value`,  `Praser` 会尝试从传入的`Value`中解析出`Type`.
 
 ```go
 // for example
@@ -144,7 +144,7 @@ p1 := GetParamWithType("x", rule_engine.ValueTypeDecimal, "3.3")
 variable {{x}} will be prase to decimal 3.3
 ```
 
-if both set `Name` , `Value` and `Type`, `Praser` will try to reparse the `Value` according to `Type`.
+如果同时设置 `Name` , `Value` 和 `Type`, `Praser` 会根据传入的`Type`重新解析 `Value` 。
 
 ```go
 // for example
@@ -152,11 +152,11 @@ p2 := GetParam("y", "3.3")
 variable {{y}} will be prase to string "3.3"
 ```
 
-the detail about the variable can see `Support Variable` section.
+传入变量的使用可以参考`变量支持`一节。
 
-### Get Result
+### 获取结果
 
-the Api Parse will return a `TokenNode` as Result.
+最终 `Parse`接口会返回 `TokenNode` 作为结果。
 
 ```go
 type TokenNode struct {
@@ -177,9 +177,9 @@ func (t *TokenNode) GetDecimal() decimal.Decimal
 func (t *TokenNode) GetString() string
 ```
 
-## Implementations
+## 功能实现
 
-### Support Value Type
+### 支持类型
 
 | Type    | ValueType in Code |
 | ------- | ----------------- |
@@ -189,21 +189,21 @@ func (t *TokenNode) GetString() string
 | float   | ValueTypeFloat    |
 | decimal | ValueTypeDecimal  |
 
-> notice：the implementation of decimal in the project depends on the  https://github.com/shopspring/decimal
+> 注意：decimal类型相关的实现依赖  https://github.com/shopspring/decimal
 
-#### Value Type Reduce
+#### 类型归约
 
-The value type will be implicitly reduced to the more precise type in calculation.
+在运算中算数类型的值会隐式归约为更加精确的类型。
 
-if `int` meet `float`, will be treated as `float`, and the result is `float`.
+如果 `int` 和 `float`一起计算, `int`会先转换为 `float`, 并且最终结果是 `float`.
 
-If `int` or `float` meet `decimal`, will be treated as `decimal`, and the result is `decimal`.
+如果 `int` 或者 `float` 和`decimal`一起计算, 都会被转换为`decimal`, 最终结果也是 `decimal`.
 
 ```go
 int >> float >> decimal
 ```
 
-for example:
+例如:
 
 ```go
 int + float = float
@@ -212,7 +212,7 @@ decimal - int = decimal
 max(int, float, deciamal) = decimal
 ```
 
-### Support Operators
+### 支持运算符
 
 | Operator        | Name              | Support Types       |
 | --------------- | ----------------- | ------------------- |
@@ -235,9 +235,9 @@ max(int, float, deciamal) = decimal
 | `or` `\|\|`     | Or                | bool                |
 | `x if c else y` | Ternary operator  | ALL, `c` must bool  |
 
-#### Operator Priority
+#### 运算符优先级
 
-Decreasing priority from top to bottom.
+优先级从上到下依次递减。
 
 ```go
 () {{var_name}}
@@ -250,13 +250,13 @@ if else (ternary operator)
 and && or ||
 ```
 
-### Support Variable
+### 支持传入变量
 
-`rule_engine` supports variable in calculation, by use `{{}}`(double braces) to enclose the variable name.
+`rule_engine` 支持在运算中传入外部变量, 通过使用 `{{}}`(双打括号) 包裹变量名表示。
 
-the varibale name and value should be passed in the interface, with the type: `Param`
+传入的变量名和类型需要通过`Param`在创建`Praser`的时候传递。
 
-can see the example:
+使用示例:
 
 ```go
 d: type decimal, value 3.3
@@ -265,11 +265,11 @@ i: type int, value 100
 {{d}} * 100 + 3 - int({{i}} * 10 / 3)  --> 0
 ```
 
-the variable type can be `int`, `float`, `decimal`, `bool`, `string`
+传入变量的类型可以是 `int`, `float`, `decimal`, `bool`, `string`
 
-### Funcations
+### 函数
 
-#### Function List
+#### 支持的内置函数列表
 
 | Function Name | Descrption                          |
 | ------------- | ----------------------------------- |
@@ -474,9 +474,9 @@ string(100)
 "100"
 ```
 
-### BNF of ruleengine
+### BNF 范式
 
-This is the BNF(Backus Normal Form) of the rule_engine, how to reduce the input and calculate the result.
+`rule_engine`解析语法的BNF范式，描述了如何解析输入的字符串并且归约得到结果。
 
 ```go
 top :
@@ -559,5 +559,6 @@ VAR_NAME :
 
 ### Why need rule engine?
 
-## TODO
 
+
+## TODO
