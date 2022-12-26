@@ -220,7 +220,7 @@ func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
 	if x.ValueType == ValueTypeBool || y.ValueType == ValueTypeBool {
 		err := batchCheckFieldType([]*TokenNode{x, y}, []ValueType{ValueTypeBool})
 		if err != nil {
-			err.(*engineErr).errMsg = "invalid equal operation for bool value with other type"
+			err.(*EngineErr).ErrMsg = "invalid equal operation for bool value with other type"
 			return nil, err
 		}
 		res.Value = getBool(x) == getBool(y)
@@ -230,7 +230,7 @@ func (o *TokenOperator) tokenNodeEqual(x, y *TokenNode) (*TokenNode, error) {
 	if x.ValueType == ValueTypeString || y.ValueType == ValueTypeString {
 		err := batchCheckFieldType([]*TokenNode{x, y}, []ValueType{ValueTypeString})
 		if err != nil {
-			err.(*engineErr).errMsg = "invalid equal operation for string value with other type"
+			err.(*EngineErr).ErrMsg = "invalid equal operation for string value with other type"
 			return nil, err
 		}
 		res.Value = getString(x) == getString(y)
@@ -324,7 +324,7 @@ func (o *TokenOperator) tokenNodeThirdOper(x *TokenNode, c *TokenNode, y *TokenN
 	err := checkFiledType(c, []ValueType{ValueTypeBool})
 	if err != nil {
 		strValueType := valueTypeNameDict[c.ValueType]
-		err.(*engineErr).errMsg = fmt.Sprintf("if else condition type must bool value, but give :%v", strValueType)
+		err.(*EngineErr).ErrMsg = fmt.Sprintf("if else condition type must bool value, but give :%v", strValueType)
 		return nil, err
 	}
 
