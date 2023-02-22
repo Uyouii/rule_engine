@@ -2,6 +2,8 @@
 
 The rule engine is implemented with go-yacc,  parsing the calculation string and calculating the result. It sas supported input variables, arithmetic operations, logical operations, decimal float and some built-in functions, which will be extended later as needed.
 
+[中文](https://github.com/Uyouii/rule_engine/blob/master/readme.zh_cn.md)
+
 
 ## Install
 
